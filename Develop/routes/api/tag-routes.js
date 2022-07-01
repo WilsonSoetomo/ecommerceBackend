@@ -6,11 +6,9 @@ const { Tag, Product, ProductTag } = require("../../models");
 router.get("/", (req, res) => {
   // find all tags
   Tag.findAll({
-    attributes: ["id", "tag_name"],
     include: [
       {
         model: Product,
-        attributes: ["id", "name", "price", "image_url", "description"],
       },
     ],
   })
@@ -29,11 +27,10 @@ router.get("/:id", (req, res) => {
     where: {
       id: req.params.id,
     },
-    attributes: ["id", "tag_name"],
     include: [
       {
         model: Product,
-        attributes: ["id", "name", "price", "image_url", "description"],
+        through: ProductTag,  
       },
     ],
   })
@@ -67,7 +64,10 @@ router.put("/:id", (req, res) => {
         id: req.params.id,
       },
     }
-  );
+  ).then((dbTagData) => res.json(dbTagData))
+    .catch((err) => {
+      res.status(500).json(err);
+    });
 });
 
 router.delete("/:id", (req, res) => {
@@ -76,9 +76,11 @@ router.delete("/:id", (req, res) => {
     where: {
       id: req.params.id,
     },
-  }).then((tag)=> res.json(tag)).catch((err) => {
-    res.status(500).json(err);
-  });
+  })
+    .then((tag) => res.json(tag))
+    .catch((err) => {
+      res.status(500).json(err);
+    });
 });
 
 module.exports = router;
